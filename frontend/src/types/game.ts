@@ -3,6 +3,7 @@ export type DatabaseCharacter = {
   name: string;
   element: string;
   title: string;
+  weapon_type: string | null;
   image_url: string | null;
 };
 

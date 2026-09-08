@@ -1,5 +1,12 @@
-function NavBar() {
-  return (  
+type Page = "agenda" | "characters" | "weapons";
+
+type LeftBarProps = {
+  section: Page;
+  onSectionChange: (page: Page) => void;
+};
+
+function LeftBar({ section, onSectionChange }: LeftBarProps) {
+  return (
     <aside className="sidebar">
       <div className="brand">
         <span className="brand-mark">✦</span>
@@ -7,26 +14,39 @@ function NavBar() {
           Resin<span>ly</span>
         </span>
       </div>
+
       <nav>
-        <a className="nav-link active">
+        <button
+          className={`nav-link ${section === "agenda" ? "active" : ""}`}
+          onClick={() => onSectionChange("agenda")}
+        >
           <span>▦</span> Minha agenda
-        </a>
-        <a className="nav-link">
+        </button>
+
+        <button
+          className={`nav-link ${section === "characters" ? "active" : ""}`}
+          onClick={() => onSectionChange("characters")}
+        >
           <span>◈</span> Personagens
-        </a>
-        <a className="nav-link">
+        </button>
+
+        <button
+          className={`nav-link ${section === "weapons" ? "active" : ""}`}
+          onClick={() => onSectionChange("weapons")}
+        >
           <span>⚔</span> Armas
-        </a>
+        </button>
       </nav>
+
       <div className="sidebar-footer">
         <div className="mini-avatar">D</div>
         <div>
           <b>Viajante</b>
           <small>AR 58</small>
         </div>
-        <button>•••</button>
       </div>
     </aside>
   );
 }
-export default NavBar;
+
+export default LeftBar;

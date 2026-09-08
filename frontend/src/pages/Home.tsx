@@ -6,10 +6,13 @@ import type { FarmItem } from "../types/farm";
 import type { DatabaseCharacter, DatabaseWeapon } from "../types/game";
 import { getCharacterImageUrl } from "../utils/caracterImages";
 
+type HomeProps = {
+  onNavigate: (page: "agenda" | "characters" | "weapons") => void;
+};
 
 type SavedPlan = { character: string; weapon: string };
 
-function Home() {
+function Home({ onNavigate }: HomeProps) {
   const [characters, setCharacters] = useState<DatabaseCharacter[]>([]);
   const [weapons, setWeapons] = useState<DatabaseWeapon[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState("");
@@ -69,7 +72,7 @@ function Home() {
 
   return (
     <div className="app-shell">
-      <LeftBar />
+      <LeftBar section="agenda" onSectionChange={onNavigate} />
       <main className="content">
         <header className="topbar">
           <div>
@@ -90,7 +93,7 @@ function Home() {
             <div>
               <small>RESINA ORIGINAL</small>
               <b>
-                160 <em>/ 160</em>
+                200 <em>/ 200</em>
               </b>
             </div>
             <button>+</button>

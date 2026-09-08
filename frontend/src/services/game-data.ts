@@ -15,7 +15,7 @@ export async function getPlanningOptions(): Promise<PlanningOptions> {
   const [charactersResult, weaponsResult] = await Promise.all([
     supabase
       .from("characters")
-      .select("id, name, element, title, image_url")
+      .select("id, name, element, title, weapon_type, image_url")
       .order("name"),
     supabase.from("weapons").select("id, name, type, image_url").order("name"),
   ]);
@@ -84,4 +84,61 @@ export async function getPlanningMaterials(
       materials.map((material) => [material.id, materialToFarmItem(material)]),
     ).values(),
   ];
+}
+// ...existing code...
+
+export async function getCharactersWithMaterials() {
+  const { data, error } = await supabase
+    .from("characters")
+    .select(
+      `
+      id,
+      name,
+      element,
+      title,
+      weapon_type,
+      image_url,
+      character_materials (
+        material:materials (
+          id,
+          name,
+          type,
+          location,
+          farm_days
+        )
+      )
+    `,
+    )
+    .order("name");
+
+  if (error) throw error;
+
+  return data ?? [];
+}
+
+export async function getWeaponsWithMaterials() {
+  const { data, error } = await supabase
+    .from("weapons")
+    .select(
+      `
+      id,
+      name,
+      type,
+      image_url,
+      weapon_materials (
+        material:materials (
+          id,
+          name,
+          type,
+          location,
+          farm_days
+        )
+      )
+    `,
+    )
+    .order("name");
+
+  if (error) throw error;
+
+  return data ?? [];
 }
