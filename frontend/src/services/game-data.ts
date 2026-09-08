@@ -29,7 +29,9 @@ export async function getPlanningOptions(): Promise<PlanningOptions> {
   };
 }
 
-type MaterialRelation = { material: DatabaseMaterial | null };
+type MaterialRelation = {
+  material: DatabaseMaterial | DatabaseMaterial[] | null;
+};
 
 const allDays: FarmDay[] = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const validDays = new Set<FarmDay>(allDays);

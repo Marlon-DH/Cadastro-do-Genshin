@@ -4,6 +4,7 @@ import LeftBar from "../components/LeftBar";
 import { getPlanningOptions } from "../services/game-data";
 import type { FarmItem } from "../types/farm";
 import type { DatabaseCharacter, DatabaseWeapon } from "../types/game";
+import { getCharacterImageUrl } from "../utils/caracterImages";
 
 
 type SavedPlan = { character: string; weapon: string };
@@ -154,11 +155,17 @@ function Home() {
             <div className="char-card">
               <div className="portrait pyro">
                 {activeCharacter?.image_url ? (
-                  <img
-                    className="h-full w-full rounded-[inherit] object-cover"
-                    src={activeCharacter.image_url}
-                    alt=""
-                  />
+                <img
+                    src={getCharacterImageUrl(
+                        activeCharacter?.image_url ?? null,
+                        activeCharacter?.name ?? "Personagem",
+                    )}
+                    alt={activeCharacter?.name ?? "Personagem"}
+                    onError={(event) => {
+                        event.currentTarget.src =
+                        "https://placehold.co/160x160/f1edf8/8b8495?text=Sem+imagem";
+                    }}
+                />
                 ) : (
                   "♟"
                 )}
@@ -176,11 +183,17 @@ function Home() {
             <div className="char-card">
               <div className="portrait gold">
                 {activeWeapon?.image_url ? (
-                  <img
-                    className="h-full w-full rounded-[inherit] object-cover"
-                    src={activeWeapon.image_url}
-                    alt=""
-                  />
+                    <img
+                    src={getCharacterImageUrl(
+                        activeWeapon?.image_url ?? null,
+                        activeWeapon?.name ?? "Arma",
+                    )}
+                    alt={activeWeapon?.name ?? "Arma"}
+                    onError={(event) => {
+                        event.currentTarget.src =
+                        "https://placehold.co/160x160/f1edf8/8b8495?text=Sem+imagem";
+                    }}
+                    />
                 ) : (
                   "⚔"
                 )}

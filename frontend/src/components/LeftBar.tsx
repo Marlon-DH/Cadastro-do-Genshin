@@ -15,7 +15,7 @@ function NavBar() {
           <span>◈</span> Personagens
         </a>
         <a className="nav-link">
-          <span>⚔</span> Materiais
+          <span>⚔</span> Armas
         </a>
       </nav>
       <div className="sidebar-footer">
