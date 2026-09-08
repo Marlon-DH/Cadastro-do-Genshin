@@ -5,6 +5,7 @@ import { getPlanningOptions } from "../services/game-data";
 import type { FarmItem } from "../types/farm";
 import type { DatabaseCharacter, DatabaseWeapon } from "../types/game";
 
+
 type SavedPlan = { character: string; weapon: string };
 
 function Home() {
