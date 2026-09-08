@@ -1,12 +1,16 @@
 import type { DatabaseMaterial } from "../types/game";
 import { getCharacterImageUrl } from "../utils/caracterImages";
+import {
+  fallbackImage,
+  getWeaponImageUrl,
+} from "../utils/caracterImages";
 
 type EntityCardProps = {
   name: string;
   imageUrl: string | null;
   subtitle: string;
   materials: DatabaseMaterial[];
-  entityType?: "character" | "weapon";
+  entityType: "character" | "weapon";
 };
 
 function EntityCard({
@@ -17,10 +21,9 @@ function EntityCard({
   entityType,
 }: EntityCardProps) {
   const imageSource =
-    entityType === "character"
-      ? getCharacterImageUrl(imageUrl, name)
-      : imageUrl ||
-        `https://placehold.co/240x240/f1edf8/8b8495?text=${encodeURIComponent(name)}`;
+  entityType === "character"
+    ? getCharacterImageUrl(imageUrl, name)
+    : getWeaponImageUrl(imageUrl, name);
 
   return (
     <article className="entity-card">
@@ -29,7 +32,8 @@ function EntityCard({
           src={imageSource}
           alt={name}
           onError={(event) => {
-            event.currentTarget.src = `https://placehold.co/240x240/f1edf8/8b8495?text=${encodeURIComponent(name)}`;
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = fallbackImage(name);
           }}
         />
       </div>
