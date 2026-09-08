@@ -43,7 +43,7 @@ function Agenda({ items }: AgendaProps) {
         </button>
       </div>
       <div className="overflow-x-auto pb-3">
-        <div className="grid min-w-[1290px] grid-7 gap-3">
+        <div className="grid min-w-[1540px] grid-cols-7 gap-3">
           {week.map(({ day, date }, index) => {
             const tasks = items.filter((item) => item.days.includes(day));
             return (

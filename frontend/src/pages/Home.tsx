@@ -1,126 +1,73 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Agenda from "../components/Agenda";
 import LeftBar from "../components/LeftBar";
-import type { Character, FarmItem } from "../types/farm";
-const characters: Character[] = [
-  {
-    name: "Arlecchino",
-    element: "Pyro",
-    title: "A Serva",
-    items: [
-      {
-        name: "Filosofia da Ordem",
-        days: ["Qua", "Sáb", "Dom"],
-        kind: "Talento",
-        icon: "📚",
-      },
-      {
-        name: "Insígnia do Recruta",
-        days: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
-        kind: "Inimigo",
-        icon: "✦",
-      },
-      {
-        name: "Vela Desvanecida",
-        days: ["Seg"],
-        kind: "Chefe semanal",
-        icon: "♜",
-      },
-    ],
-  },
-  {
-    name: "Neuvillette",
-    element: "Hydro",
-    title: "Iudex de Fontaine",
-    items: [
-      {
-        name: "Filosofia da Equidade",
-        days: ["Seg", "Qui", "Dom"],
-        kind: "Talento",
-        icon: "📚",
-      },
-      {
-        name: "Pérola Transoceânica",
-        days: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
-        kind: "Inimigo",
-        icon: "✦",
-      },
-    ],
-  },
-  {
-    name: "Furina",
-    element: "Hydro",
-    title: "Regina de Fontaine",
-    items: [
-      {
-        name: "Filosofia da Justiça",
-        days: ["Ter", "Sex", "Dom"],
-        kind: "Talento",
-        icon: "📚",
-      },
-      {
-        name: "Néctar da Flor Gigante",
-        days: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
-        kind: "Inimigo",
-        icon: "✦",
-      },
-    ],
-  },
-];
-const weapons: Record<string, FarmItem> = {
-  "Lança de Jade": {
-    name: "Relíquia de Guyun",
-    days: ["Seg", "Qui", "Dom"],
-    kind: "Arma",
-    icon: "⚔",
-  },
-  "Báculo de Homa": {
-    name: "Grão de Areia Negra",
-    days: ["Ter", "Sex", "Dom"],
-    kind: "Arma",
-    icon: "⚔",
-  },
-  "Tomo do Fluxo Eterno": {
-    name: "Gota de Orvalho Sagrado",
-    days: ["Qua", "Sáb", "Dom"],
-    kind: "Arma",
-    icon: "⚔",
-  },
-};
+import { getPlanningOptions } from "../services/game-data";
+import type { FarmItem } from "../types/farm";
+import type { DatabaseCharacter, DatabaseWeapon } from "../types/game";
+
+type SavedPlan = { character: string; weapon: string };
+
 function Home() {
-  const [selectedCharacter, setSelectedCharacter] = useState("Arlecchino");
-  const [selectedWeapon, setSelectedWeapon] = useState("Lança de Jade");
-  const [saved, setSaved] = useState([
-    { character: "Arlecchino", weapon: "Lança de Jade" },
-  ]);
+  const [characters, setCharacters] = useState<DatabaseCharacter[]>([]);
+  const [weapons, setWeapons] = useState<DatabaseWeapon[]>([]);
+  const [selectedCharacterId, setSelectedCharacterId] = useState("");
+  const [selectedWeaponId, setSelectedWeaponId] = useState("");
+  const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    async function loadPlanningOptions() {
+      try {
+        const options = await getPlanningOptions();
+        setCharacters(options.characters);
+        setWeapons(options.weapons);
+        setSelectedCharacterId(String(options.characters[0]?.id ?? ""));
+        setSelectedWeaponId(String(options.weapons[0]?.id ?? ""));
+      } catch {
+        setError(
+          "Não foi possível carregar personagens e armas do banco de dados.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void loadPlanningOptions();
+  }, []);
+
   const activeCharacter = characters.find(
-    (character) => character.name === selectedCharacter,
-  )!;
-  const activeItems = useMemo(
-    () => [...activeCharacter.items, weapons[selectedWeapon]],
-    [activeCharacter, selectedWeapon],
+    (character) => character.id === Number(selectedCharacterId),
   );
+  const activeWeapon = weapons.find(
+    (weapon) => weapon.id === Number(selectedWeaponId),
+  );
+  const activeItems: FarmItem[] = [];
+
   function addToAgenda() {
-    const exists = saved.some(
-      (item) =>
-        item.character === selectedCharacter && item.weapon === selectedWeapon,
+    if (!activeCharacter || !activeWeapon) return;
+    const exists = savedPlans.some(
+      (plan) =>
+        plan.character === activeCharacter.name &&
+        plan.weapon === activeWeapon.name,
     );
     if (!exists)
-      setSaved((current) => [
-        ...current,
-        { character: selectedCharacter, weapon: selectedWeapon },
+      setSavedPlans((plans) => [
+        ...plans,
+        { character: activeCharacter.name, weapon: activeWeapon.name },
       ]);
     setNotice(
       exists
         ? "Esta combinação já está na sua agenda."
-        : "Personagem adicionado à agenda!",
+        : "Planejamento salvo. Agora vamos conectar os materiais.",
     );
-    window.setTimeout(() => setNotice(""), 2600);
+    window.setTimeout(() => setNotice(""), 3000);
   }
+
   return (
     <div className="app-shell">
-     <LeftBar></LeftBar>
+      <LeftBar />
       <main className="content">
         <header className="topbar">
           <div>
@@ -155,55 +102,94 @@ function Home() {
             </div>
             <span className="step">1 de 2</span>
           </div>
+          {error && <p className="notice">{error}</p>}
           <div className="selectors">
             <label>
               PERSONAGEM
               <select
-                value={selectedCharacter}
-                onChange={(event) => setSelectedCharacter(event.target.value)}
+                value={selectedCharacterId}
+                disabled={isLoading}
+                onChange={(event) => setSelectedCharacterId(event.target.value)}
               >
+                <option value="">
+                  {isLoading
+                    ? "Carregando personagens..."
+                    : "Selecione um personagem"}
+                </option>
                 {characters.map((character) => (
-                  <option key={character.name}>{character.name}</option>
+                  <option key={character.id} value={character.id}>
+                    {character.name}
+                  </option>
                 ))}
               </select>
             </label>
             <label>
               ARMA
               <select
-                value={selectedWeapon}
-                onChange={(event) => setSelectedWeapon(event.target.value)}
+                value={selectedWeaponId}
+                disabled={isLoading}
+                onChange={(event) => setSelectedWeaponId(event.target.value)}
               >
-                {Object.keys(weapons).map((weapon) => (
-                  <option key={weapon}>{weapon}</option>
+                <option value="">
+                  {isLoading ? "Carregando armas..." : "Selecione uma arma"}
+                </option>
+                {weapons.map((weapon) => (
+                  <option key={weapon.id} value={weapon.id}>
+                    {weapon.name}
+                  </option>
                 ))}
               </select>
             </label>
-            <button className="add-button" onClick={addToAgenda}>
+            <button
+              className="add-button"
+              disabled={!activeCharacter || !activeWeapon}
+              onClick={addToAgenda}
+            >
               <span>+</span> Adicionar à agenda
             </button>
           </div>
           {notice && <p className="notice">✓ {notice}</p>}
           <div className="selection-preview">
             <div className="char-card">
-              <div className="portrait pyro">♟</div>
+              <div className="portrait pyro">
+                {activeCharacter?.image_url ? (
+                  <img
+                    className="h-full w-full rounded-[inherit] object-cover"
+                    src={activeCharacter.image_url}
+                    alt=""
+                  />
+                ) : (
+                  "♟"
+                )}
+              </div>
               <div>
-                <b>{activeCharacter.name}</b>
+                <b>{activeCharacter?.name ?? "Nenhum personagem"}</b>
                 <small>
-                  {activeCharacter.element} · {activeCharacter.title}
+                  {activeCharacter
+                    ? `${activeCharacter.element} · ${activeCharacter.title}`
+                    : "Selecione um personagem"}
                 </small>
               </div>
             </div>
             <span className="plus">+</span>
             <div className="char-card">
-              <div className="portrait gold">⚔</div>
+              <div className="portrait gold">
+                {activeWeapon?.image_url ? (
+                  <img
+                    className="h-full w-full rounded-[inherit] object-cover"
+                    src={activeWeapon.image_url}
+                    alt=""
+                  />
+                ) : (
+                  "⚔"
+                )}
+              </div>
               <div>
-                <b>{selectedWeapon}</b>
-                <small>Arma selecionada</small>
+                <b>{activeWeapon?.name ?? "Nenhuma arma"}</b>
+                <small>{activeWeapon?.type ?? "Selecione uma arma"}</small>
               </div>
             </div>
-            <div className="auto-tag">
-              ✦ Materiais detectados automaticamente
-            </div>
+            <div className="auto-tag">✦ Dados carregados do Supabase</div>
           </div>
         </section>
         <Agenda items={activeItems} />
@@ -213,23 +199,30 @@ function Home() {
             <h2>Seus planejamentos</h2>
           </div>
           <div className="saved-list">
-            {saved.map((item) => (
-              <div
-                className="saved-item"
-                key={`${item.character}-${item.weapon}`}
-              >
-                <span className="saved-spark">✦</span>
-                <div>
-                  <b>{item.character}</b>
-                  <small>com {item.weapon}</small>
+            {savedPlans.length ? (
+              savedPlans.map((plan) => (
+                <div
+                  className="saved-item"
+                  key={`${plan.character}-${plan.weapon}`}
+                >
+                  <span className="saved-spark">✦</span>
+                  <div>
+                    <b>{plan.character}</b>
+                    <small>com {plan.weapon}</small>
+                  </div>
+                  <span className="status">ATIVO</span>
                 </div>
-                <span className="status">ATIVO</span>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-[#8b8493]">
+                Escolha um personagem e uma arma para começar.
+              </p>
+            )}
           </div>
         </section>
       </main>
     </div>
   );
 }
+
 export default Home;

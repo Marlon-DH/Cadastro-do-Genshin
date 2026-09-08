@@ -6,10 +6,3 @@ export type FarmItem = {
   kind: "Talento" | "Arma" | "Inimigo" | "Chefe semanal";
   icon: string;
 };
-
-export type Character = {
-  name: string;
-  element: string;
-  title: string;
-  items: FarmItem[];
-};
