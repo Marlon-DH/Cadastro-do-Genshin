@@ -15,9 +15,12 @@ export async function getPlanningOptions(): Promise<PlanningOptions> {
   const [charactersResult, weaponsResult] = await Promise.all([
     supabase
       .from("characters")
-      .select("id, name, element, title, weapon_type, image_url")
+      .select("id, name, element, title, weapon_type, image_url, rarity")
       .order("name"),
-    supabase.from("weapons").select("id, name, type, image_url").order("name"),
+    supabase
+      .from("weapons")
+      .select("id, name, type, image_url, rarity")
+      .order("name"),
   ]);
 
   if (charactersResult.error) throw charactersResult.error;

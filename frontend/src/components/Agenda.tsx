@@ -27,72 +27,99 @@ const taskColors: Record<FarmItem["kind"], string> = {
 };
 
 function Agenda({ items }: AgendaProps) {
+  const allDays: FarmDay[] = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  const everyDayItems = items.filter(
+    (item) => item.days.length === allDays.length,
+  );
+  const scheduledItems = items.filter(
+    (item) => item.days.length < allDays.length && item.days.length > 0,
+  );
+
   return (
-    <section className="mt-11">
-      <div className="mb-4 flex items-end justify-between gap-4">
+    <section className="agenda-section mt-11">
+      <div className="section-title mb-4">
         <div>
-          <p className="font-mono text-[10px] tracking-[.125em] text-[#8e8798]">
-            SUA SEMANA
-          </p>
-          <h2 className="font-['Fraunces'] text-[27px] font-bold tracking-tight">
-            Agenda de farm
-          </h2>
+          <p className="eyebrow">SUA SEMANA</p>
+          <h2>Agenda de farm</h2>
         </div>
-        <button className="rounded-md border border-[#e2dfe7] bg-white px-3 py-2 text-[11px] text-[#696272]">
+        <button className="week-button">
           ‹ &nbsp; 8–14 de setembro &nbsp; ›
         </button>
       </div>
-      <div className="overflow-x-auto pb-3">
-        <div className="grid min-w-[1540px] grid-cols-7 gap-3">
-          {week.map(({ day, date }, index) => {
-            const tasks = items.filter((item) => item.days.includes(day));
-            return (
-              <div
-                className="min-h-[380px] overflow-hidden rounded-xl border border-[#ebe9f0] bg-white"
-                key={day}
-              >
+
+      <div className="agenda-layout">
+        <div className="overflow-x-auto pb-3">
+          <div className="calendar-grid">
+            {week.map(({ day, date }, index) => {
+              const tasks = scheduledItems.filter((item) =>
+                item.days.includes(day),
+              );
+
+              return (
                 <div
-                  className={`border-b border-[#f0edf3] px-4 py-4 ${index === 0 ? "bg-[#f4ecff]" : ""}`}
+                  className={`day-column ${index === 0 ? "today" : ""}`}
+                  key={day}
                 >
-                  <small className="block font-mono text-[10px] text-[#8b8495] uppercase">
-                    {day}
-                  </small>
-                  <b
-                    className={`mt-1 block font-['Fraunces'] text-[22px] ${index === 0 ? "text-[#70449e]" : ""}`}
-                  >
-                    {date}
-                  </b>
+                  <div className="day-header">
+                    <small>{day}</small>
+                    <b>{date}</b>
+                  </div>
+
+                  <div className="tasks">
+                    {tasks.length ? (
+                      tasks.map((item) => (
+                        <article
+                          className={`task ${item.kind.toLowerCase().replace(/\s+/g, "-")}`}
+                          key={`${item.name}-${day}`}
+                        >
+                          <span className="task-icon">{item.icon}</span>
+                          <div>
+                            <b>{item.name}</b>
+                            <small>{item.kind}</small>
+                          </div>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="rest">
+                        Dia livre
+                        <br />
+                        <span>sem domínio</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-2 p-3">
-                  {tasks.length ? (
-                    tasks.map((item) => (
-                      <article
-                        className={`flex min-h-[70px] gap-2 rounded-md border-l-[3px] p-2 ${taskColors[item.kind]}`}
-                        key={item.name}
-                      >
-                        <span className="text-base">{item.icon}</span>
-                        <div>
-                          <b className="block text-xs leading-tight">
-                            {item.name}
-                          </b>
-                          <small className="mt-1 block text-[10px] text-[#756e7e]">
-                            {item.kind}
-                          </small>
-                        </div>
-                      </article>
-                    ))
-                  ) : (
-                    <div className="pt-20 text-center text-xs text-[#bbb4c1]">
-                      Dia livre
-                      <br />
-                      <span className="text-[10px]">sem domínio</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+
+        <aside className="everyday-panel">
+          <div className="everyday-header">
+            <p className="eyebrow">TODO DIA</p>
+            <h3>Farm contínuo</h3>
+          </div>
+
+          {everyDayItems.length ? (
+            <div className="everyday-list">
+              {everyDayItems.map((item) => (
+                <article
+                  className={`task ${item.kind.toLowerCase().replace(/\s+/g, "-")}`}
+                  key={`${item.name}-daily`}
+                >
+                  <span className="task-icon">{item.icon}</span>
+                  <div>
+                    <b>{item.name}</b>
+                    <small>{item.kind}</small>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="empty-state">
+              Nenhum item para farmar todos os dias.
+            </p>
+          )}
+        </aside>
       </div>
     </section>
   );

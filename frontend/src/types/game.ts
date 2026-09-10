@@ -5,6 +5,7 @@ export type DatabaseCharacter = {
   title: string;
   weapon_type: string | null;
   image_url: string | null;
+  rarity?: number | string | null;
 };
 
 export type DatabaseWeapon = {
@@ -12,6 +13,7 @@ export type DatabaseWeapon = {
   name: string;
   type: string;
   image_url: string | null;
+  rarity?: number | string | null;
 };
 
 export type DatabaseMaterial = {
